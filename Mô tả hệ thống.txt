@@ -1,0 +1,81 @@
+Các chức năng:
+- Quản lý tasks:
+    Giao tiếp trên bot Tele:
+        +Thêm task: lệnh /add <nội dung>
+        +Lấy tasks hôm nay: lệnh /today
+        +Lấy tasks theo ngày bất kỳ: lệnh /getd <ngày/tháng/năm>
+        +Lấy tasks theo ngày bất kỳ: lệnh /getw <ngày/tháng/năm> 
+        +Tìm tasks để chỉnh sửa nội dung: lệnh /getu <title hoặc <ngày/tháng/năm> >
+        +Chỉnh sửa tasks: lệnh /update <nội dung>
+        +Tự động nhắc nhở 2 lần: 1 lần trước 30p, 1 lần đúng giờ
+    Lưu ý: <ngày/tháng/năm> có thể nhập được nhiều biến thể.
+    Giao tiếp trên web:
+        +Tất cả chức năng trên bot
+        +Xoá task, xoá nhiều task
+- Quản lý thời gian biểu cá nhân:
+    Trên bot Tele:
+        +Tự động nhắc nhở 2 lần: 1 lần trước 5p, 1 lần đúng giờ
+    Trên web:
+        +Thêm/sửa/xoá/cập nhật
+- Tìm kiếm file:
+    Trên bot Tele:
+        +Tìm theo từ khoá (keyword): lệnh /findk
+        +Tìm theo thời gian (time): lệnh /findt
+        +Tìm theo mô tả (description): lệnh /findd
+        +Tìm theo tên thư mục cha (parent folder): lệnh /findp
+        +Tìm theo loại file (extendtion): lệnh /finde
+    Lưu ý: Tất cả file đều mở được, tuy nhiên kết quả tìm kiếm không được chính xác 100%
+
+Các luồng giao tiếp:
+    +Trên bot Tele
+    +Trên web Admin
+
+Các luồng xử lý:
+    +Lệnh slash : Làm xong full
+    +Ngôn ngữ tự nhiên NLP: Chưa làm, đang để chờ
+    +Thao tác trên web Admin: Chuẩn bị làm
+
+Các công cụ/ công nghệ/ AI: <đã dùng>
+    +NodeJS ESM
+    +Express
+    +Telegraf
+    +Telegram
+    +SQL Server
+    +Vs code
+    +FPT.AI
+    +OpenAI các model openai/gpt-3.5-turbo, mistralai/mixtral-8x7b-instruct, meta-llama/llama-3-8b-instruct 
+
+Các thư viện được sử dụng:
+    "dependencies": {
+    "@vitalets/google-translate-api": "^9.2.1",
+    "axios": "^1.11.0",
+    "chalk": "^5.5.0",
+    "chrono-node": "^2.8.4",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "fuse.js": "^7.1.0",
+    "googleapis": "^155.0.1",
+    "mssql": "^11.0.1",
+    "node-cron": "^4.2.1",
+    "node-schedule": "^2.1.1",
+    "telegraf": "^4.16.3",
+    "winston": "^3.17.0"
+    },
+    "devDependencies": {
+        "cross-env": "^10.0.0",
+        "jest": "^30.0.5",
+        "nodemon": "^3.1.10"
+    }
+
+Tổng quan cấu trúc dự án: <hiện tại và không tính thư viện>
+    +Xây dựng trên cấu trúc Client-Server
+    +5 file json, 20 file js,...
+
+TIẾN ĐỘ:
+- Quản lý tasks:
+    Giao tiếp trên bot Tele: Xong full
+- Quản lý thời gian biểu cá nhân:
+    Trên bot Tele: Xong
+- Tìm kiếm file:
+    Trên bot Tele: Xong
+        

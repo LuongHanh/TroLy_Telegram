@@ -1,0 +1,14 @@
+# Env & keys
+.env
+google-drive-key.json
+
+# Cache & temp
+Cache/
+*.log
+
+# Node modules
+node_modules/
+web/node_modules/
+
+# Build files
+web/dist/
