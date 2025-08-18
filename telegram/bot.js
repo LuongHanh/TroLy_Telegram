@@ -167,7 +167,7 @@ export function launchBot() {
               const webLink = process.env.WEB_LINK; // lấy link từ .env
               await ctx.reply(`Link web: ${webLink}`, {
                 reply_markup: {
-                  inline_keyboard: [ { text: "🔗 Mở web", url: webLink } ]
+                  inline_keyboard: [ [{ text: "🔗 Mở web", url: webLink }] ]
                 },
                 disable_web_page_preview: true
               });
