@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL, // backend Express server
+  baseURL: import.meta.env.VITE_API_URL + "/api", // backend Express server
 });
 
 export default api;
