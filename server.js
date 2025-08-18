@@ -24,6 +24,10 @@ launchBot(); // Khởi động Telegram Bot
 manageCache(); // Chạy quản lý cache
 startReminderService(); // Chạy lịch nhắc nhở
 
+app.get("/api/ping", (req, res) => {  //ping đánh thức render
+  res.json({ status: "ok", time: new Date() });
+});
+
 // Chạy server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
