@@ -2,26 +2,14 @@
 import sql from 'mssql';
 import 'dotenv/config';
 
-const config = {
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  server: process.env.DB_SERVER,
-  database: process.env.DB_DATABASE,
-  port: parseInt(process.env.DB_PORT || "1433"),
-  options: {
-    encrypt: false, // nếu dùng localhost
-    trustServerCertificate: true
-  }
-};
-
-export const poolPromise = new sql.ConnectionPool(config)
-  .connect()
+export const poolPromise = sql.connect(process.env.DATABASE_URL)
   .then(pool => {
-    console.log('✅ SQL Server connected...');
+    console.log('✅ Connected to Azure SQL Database');
     return pool;
   })
   .catch(err => {
-    console.error('❌ Database Connection Failed! Bad Config:', err);
+    console.error('❌ Azure DB Connection Failed:', err);
+    throw err;
   });
 
 export { sql };

@@ -21,7 +21,7 @@ app.use('/api/personal-schedule', personalScheduleController);
 app.use("/admin", adminRoutes);
 
 launchBot(); // Khởi động Telegram Bot
-//manageCache(); // Chạy quản lý cache
+manageCache(); // Chạy quản lý cache
 startReminderService(); // Chạy lịch nhắc nhở
 
 // Chạy server
