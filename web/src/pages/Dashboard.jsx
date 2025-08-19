@@ -239,7 +239,7 @@ export default function Dashboard() {
             {tasks.map((t, idx) => (
               <li
                 key={t.Id || idx}
-                className="bg-white p-4 rounded-xl shadow-md flex justify-between items-center hover:shadow-lg hover:bg-green-50 transition cursor-pointer"
+                className="bg-white p-4 rounded-xl shadow-md flex justify-between items-center hover:shadow-lg hover:bg-green-50 transition"
               >
                 <div>
                   <p className="font-semibold text-gray-800">

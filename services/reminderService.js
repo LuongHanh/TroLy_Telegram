@@ -9,8 +9,9 @@ const SCHEDULE_REMIND_BEFORE_MIN = 5;
 // Tasks: nhắc trước 30 phút
 const TASK_REMIND_BEFORE_MIN = 30;
 
-// Sửa lệch DB +7h (đọc ra bị cộng 7h -> trừ 7h)
-const DB_OFFSET_FIX_HOURS = -7;
+// Sửa lệch DB local +7h (đọc ra bị cộng 7h -> trừ 7h)
+// Azure SQL không lệch
+const DB_OFFSET_FIX_HOURS = 0;
 const BKK_OFFSET_MS = 7 * 60 * 60 * 1000; // Asia/Bangkok UTC+7
 
 /* ===================== Utilities ===================== */
