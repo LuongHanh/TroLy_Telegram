@@ -32,26 +32,25 @@ export default function Tasks() {
   const [ePriority, setEPriority] = useState(3);
 
   // 'YYYY-MM-DDTHH:mm' cho <input type="datetime-local">
-  const formatVNDateTime = (val) => {
+  const toInputDT = (val) => {
     if (!val) return "";
+
     let d;
 
-    // Nếu là chuỗi yyyy-MM-dd HH:mm:ss (SQL Server)
+    // Nếu là chuỗi từ SQL Server: yyyy-MM-dd HH:mm:ss
     if (typeof val === "string" && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(val)) {
       d = new Date(val.replace(" ", "T"));
     } else {
       d = new Date(val);
     }
 
-    if (!d || Number.isNaN(d.getTime())) return "";
+    if (Number.isNaN(d.getTime())) return "";
 
-    // format về dạng dd/MM/yyyy HH:mm:ss (theo giờ VN)
-    return new Intl.DateTimeFormat("vi-VN", {
-      timeZone: "Asia/Ho_Chi_Minh",
-      year: "numeric", month: "2-digit", day: "2-digit",
-      hour: "2-digit", minute: "2-digit", second: "2-digit",
-      hour12: false
-    }).format(d);
+    // HTML5 datetime-local cần local-naive -> khử offset
+    const localNaive = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+
+    // Xuất dạng YYYY-MM-DDTHH:mm
+    return localNaive.toISOString().slice(0, 16);
   };
 
   const startEdit = (task) => {
