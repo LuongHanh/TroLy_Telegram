@@ -32,16 +32,26 @@ export default function Tasks() {
   const [ePriority, setEPriority] = useState(3);
 
   // 'YYYY-MM-DDTHH:mm' cho <input type="datetime-local">
-  const toInputDT = (val) => {
+  const formatVNDateTime = (val) => {
     if (!val) return "";
-    const d = new Date(val);
-    if (isNaN(d)) return "";
-    const parts = new Intl.DateTimeFormat('sv-SE', {
-      timeZone: 'Asia/Ho_Chi_Minh',
-      year: 'numeric', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit', hour12: false
-    }).formatToParts(d).reduce((acc, p) => (acc[p.type] = p.value, acc), {});
-    return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
+    let d;
+
+    // Nếu là chuỗi yyyy-MM-dd HH:mm:ss (SQL Server)
+    if (typeof val === "string" && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(val)) {
+      d = new Date(val.replace(" ", "T"));
+    } else {
+      d = new Date(val);
+    }
+
+    if (!d || Number.isNaN(d.getTime())) return "";
+
+    // format về dạng dd/MM/yyyy HH:mm:ss (theo giờ VN)
+    return new Intl.DateTimeFormat("vi-VN", {
+      timeZone: "Asia/Ho_Chi_Minh",
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", second: "2-digit",
+      hour12: false
+    }).format(d);
   };
 
   const startEdit = (task) => {
@@ -49,7 +59,7 @@ export default function Tasks() {
     setETitle(task.Title || "");
     setEDesc(task.Description || "");
     // Ưu tiên Deadline (ISO) → nếu không parse được thì để trống cho user chọn lại
-    setEDeadline(toInputDT(task.Deadline || task.DeadlineStr || task.DeadlineFormatted));
+    setEDeadline(toInputDT(task.DeadlineStr || task.DeadlineFormatted));
     setEPriority(Number(task.Priority ?? 3));
   };
 
