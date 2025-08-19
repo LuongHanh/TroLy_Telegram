@@ -9,9 +9,8 @@ const SCHEDULE_REMIND_BEFORE_MIN = 5;
 // Tasks: nhắc trước 30 phút
 const TASK_REMIND_BEFORE_MIN = 30;
 
-// Sửa lệch DB local +7h (đọc ra bị cộng 7h -> trừ 7h)
-// Azure SQL không lệch
-const DB_OFFSET_FIX_HOURS = 0;
+// Sửa lệch DB +7h (đọc ra bị cộng 7h -> trừ 7h)
+const DB_OFFSET_FIX_HOURS = -7;
 const BKK_OFFSET_MS = 7 * 60 * 60 * 1000; // Asia/Bangkok UTC+7
 
 /* ===================== Utilities ===================== */
@@ -143,7 +142,7 @@ async function checkTasks() {
       if (diffDays >= 0 && diffDays <= 20 && daysSince % 5 === 0) {
         const key = `task:${t.Id}:prio4:${daysSince}`;
         if (shouldSendOnce(key, 86400)) { // cache 1 ngày
-          await sendTG(`🚨 *Nhắc sớm (P4)*: _${t.Title}_\n🗓 Còn ${diffDays} ngày tới hạn\n📅 ${deadline.toLocaleDateString('vi-VN')}`);
+          await sendTG(`🚨 *Nhắc sớm (P4)*: _${t.Title}_\n🗓 Còn ${diffDays} ngày tới hạn\n📅 ${deadline.toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}`);
         }
       }
     }
@@ -155,7 +154,7 @@ async function checkTasks() {
       if (daysSince % 10 === 0 && diffDays >= 0) {
         const key = `task:${t.Id}:prio5:${daysSince}`;
         if (shouldSendOnce(key, 86400)) {
-          await sendTG(`🔴 *Nhắc định kỳ (P5)*: _${t.Title}_\n🗓 Còn ${diffDays} ngày tới hạn\n📅 ${deadline.toLocaleDateString('vi-VN')}`);
+          await sendTG(`🔴 *Nhắc định kỳ (P5)*: _${t.Title}_\n🗓 Còn ${diffDays} ngày tới hạn\n📅 ${deadline.toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}`);
         }
       }
     }
@@ -166,7 +165,7 @@ async function checkTasks() {
       if (withinToleranceSec(diffSec, beforeSec, tolSec)) {
         const key = `task:${t.Id}:before`;
         if (shouldSendOnce(key)) {
-          await sendTG(`⏳ *Công việc sắp tới*: _${t.Title}_\n🕒 ${deadline.toLocaleString('vi-VN')}`);
+          await sendTG(`⏳ *Công việc sắp tới*: _${t.Title}_\n🕒 ${deadline.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}`);
         }
       }
 
@@ -174,7 +173,7 @@ async function checkTasks() {
       if (withinToleranceSec(diffSec, 0, tolSec)) {
         const key = `task:${t.Id}:at`;
         if (shouldSendOnce(key)) {
-          await sendTG(`✅ *Đến hạn*: _${t.Title}_\n🕒 ${deadline.toLocaleString('vi-VN')}`);
+          await sendTG(`✅ *Đến hạn*: _${t.Title}_\n🕒 ${deadline.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}`);
         }
       }
     }
