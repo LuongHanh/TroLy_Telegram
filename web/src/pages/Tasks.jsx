@@ -21,8 +21,11 @@ export default function Tasks() {
   const [deadline, setDeadline] = useState("");
   const [priority, setPriority] = useState(3);
 
-  const [filter, setFilter] = useState("someday");
-  const [param, setParam] = useState("7");
+  const [filter, setFilter] = useState("week");
+  const [param, setParam] = useState(() => {
+    // Lấy ngày hôm nay dạng YYYY-MM-DD
+    return new Date().toISOString().split("T")[0];
+  });
 
   // ==== EDIT STATE ====
   const [editingId, setEditingId] = useState(null);
@@ -150,7 +153,16 @@ export default function Tasks() {
   const pendingCount = tasks.filter(t => (t.Status || "").toLowerCase() !== "done").length;
   const now = new Date();
   const overdueCount = tasks.filter(t => {
-    const d = new Date(t.Deadline);
+    if (!t.Deadline) return false;
+
+    // t.Deadline = "2025-08-20 10:00:00"
+    const [datePart, timePart] = t.Deadline.split(" ");
+    const [year, month, day] = datePart.split("-").map(Number);
+    const [hour, minute, second] = timePart.split(":").map(Number);
+
+    // new Date(year, monthIndex, day, hour, minute, second) => Local time
+    const d = new Date(year, month - 1, day, hour, minute, second);
+
     return d < now && (t.Status || "").toLowerCase() !== "done";
   }).length;
 
