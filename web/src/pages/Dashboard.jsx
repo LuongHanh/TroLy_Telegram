@@ -54,9 +54,20 @@ export default function Dashboard() {
       .finally(() => setLoadingSched(false));
   };
 
+  function parseDbDate(str) {
+    if (!str) return null;
+    // str dạng: "2025-08-20 00:00:00"
+    const [datePart, timePart] = str.split(" ");
+    const [year, month, day] = datePart.split("-").map(Number);
+    const [hour, minute, second] = timePart.split(":").map(Number);
+
+    // new Date(year, monthIndex, day, hour, minute, second) => luôn tính theo local time
+    return new Date(year, month - 1, day, hour, minute, second || 0);
+  }
+
   const fetchStats = async () => {
     try {
-      const now = new Date().toISOString().split("T")[0];
+      const now = new Date().toLocaleDateString("en-CA"); // yyyy-MM-dd theo giờ VN
       const [today, week, month, year] = await Promise.all([
         api.get("/tasks/today/all"),
         api.get(`/tasks/week/${now}`),
@@ -69,8 +80,8 @@ export default function Dashboard() {
           (t) => (t.Status || "").toLowerCase() === "done"
         ).length;
         const overdue = arr.filter((t) => {
-          const d = new Date(t.Deadline);
-          return d < new Date() && (t.Status || "").toLowerCase() !== "done";
+          const d = parseDbDate(t.DeadlineStr);
+          return d && d < new Date() && (t.Status || "").toLowerCase() !== "done";
         }).length;
         const pending = arr.length - done - overdue;
         return [
