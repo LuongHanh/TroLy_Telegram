@@ -153,10 +153,10 @@ export default function Tasks() {
   const pendingCount = tasks.filter(t => (t.Status || "").toLowerCase() !== "done").length;
   const now = new Date();
   const overdueCount = tasks.filter(t => {
-    if (!t.Deadline) return false;
+    if (!t.DeadlineStr) return false;
 
-    // t.Deadline = "2025-08-20 10:00:00"
-    const [datePart, timePart] = t.Deadline.split(" ");
+    // t.DeadlineStr = "2025-08-20 10:00:00"
+    const [datePart, timePart] = t.DeadlineStr.split(" ");
     const [year, month, day] = datePart.split("-").map(Number);
     const [hour, minute, second] = timePart.split(":").map(Number);
 
