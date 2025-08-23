@@ -44,6 +44,22 @@ export default function Tasks() {
   const [addingRecurring, setAddingRecurring] = useState(false);
   const [message, setMessage] = useState("");
 
+  const pad = (n) => String(n).padStart(2, "0");
+
+  // Tạo Date local từ "YYYY-MM-DD"
+  const parseLocalDate = (ymd) => {
+    const [y, m, d] = ymd.split("-").map(Number);
+    return new Date(y, m - 1, d, 0, 0, 0, 0); // local midnight
+  };
+
+  // Format Date -> "YYYY-MM-DD HH:mm:ss" (local)
+  const toSqlLocal = (d) =>
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
+
+  // Format Date -> "YYYY-MM-DD" (local)
+  const toYMD = (d) =>
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  
   const addRecurringTask = async (e) => {
     e.preventDefault();
 
@@ -53,54 +69,53 @@ export default function Tasks() {
     setMessage("⏳ Đang thêm...");
 
     try {
-      const start = new Date(rStart);
+      const base = parseLocalDate(rStart); // local
+      const [hh, mm] = (rHour || "00:00").split(":").map(Number);
       const tasksToAdd = [];
 
       for (let i = 0; i < rCount; i++) {
-        let dueDate = new Date(start);
+        let d = new Date(base);
 
         if (rUnit === "day") {
-          dueDate.setDate(start.getDate() + i);
+          d.setDate(base.getDate() + i);
         } else if (rUnit === "week") {
-          dueDate.setDate(start.getDate() + i * 7);
+          d.setDate(base.getDate() + i * 7);
         } else if (rUnit === "month") {
-          dueDate.setMonth(start.getMonth() + i);
+          d.setMonth(base.getMonth() + i);
         }
 
-        if (rHour) {
-          const [hh, mm] = rHour.split(":");
-          dueDate.setHours(hh, mm, 0, 0);
-        }
+        // set giờ local cố định
+        d.setHours(hh, mm, 0, 0);
 
         tasksToAdd.push({
           title: rTitle,
           description: rDesc,
-          deadline: dueDate.toISOString().slice(0, 19).replace("T", " "),
+          // GỬI LOCAL SQL STRING, KHÔNG toISOString()
+          deadline: toSqlLocal(d),
           priority: 3,
         });
       }
 
-      // gọi API bulk 1 lần duy nhất
       await api.post("/tasks/bulk", { tasks: tasksToAdd });
 
-      setAddingRecurring(false);
+      const last = tasksToAdd[tasksToAdd.length - 1];
+      const unitLabel = rUnit === "day" ? "ngày" : rUnit === "week" ? "tuần" : "tháng";
+      const endDate = last.deadline.split(" ")[0];
+
       setMessage(
-        `✅ Đã thêm thành công "${rTitle}" - ${rCount} task (${rUnit === "day" ? "ngày" : rUnit === "week" ? "tuần" : "tháng"}). Deadline: ${rHour} mỗi ngày.`
+        `✅ Đã thêm thành công "${rTitle}", deadline ${pad(hh)}:${pad(mm)} mỗi ${unitLabel} từ ${rStart} đến ${endDate}, công việc sẽ diễn ra trong ${rCount} ${unitLabel}.`
       );
 
       // reset form
-      setRTitle("");
-      setRDesc("");
-      setRStart("");
-      setRCount(1);
-      setRUnit("day");
-      setRHour("");
+      setRTitle(""); setRDesc(""); setRStart("");
+      setRCount(1); setRUnit("day"); setRHour("");
 
       fetchTasks();
     } catch (err) {
       console.error("Lỗi thêm task cố định:", err.response?.data || err);
-      setAddingRecurring(false);
       setMessage("❌ Lỗi khi thêm task cố định!");
+    } finally {
+      setAddingRecurring(false);
     }
   };
 
@@ -296,66 +311,70 @@ export default function Tasks() {
       </div>
 
       {/* Form thêm task cố định */}
-      <div className="bg-white rounded-2xl shadow p-6">
-        <h3 className="text-lg font-semibold mb-4">🔁 Thêm Task Cố Định</h3>
+      <div className="bg-green-50 rounded-xl shadow p-4 mt-6">
+        <h3 className="text-base font-semibold mb-3">🔁 Task Cố Định</h3>
         <form onSubmit={addRecurringTask} className="grid grid-cols-1 md:grid-cols-6 gap-3">
+          {/* Hàng 1: tên + mô tả */}
           <input
             type="text"
             placeholder="Tên task..."
             value={rTitle}
-            onChange={e => setRTitle(e.target.value)}
-            className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none md:col-span-2"
+            onChange={(e) => setRTitle(e.target.value)}
+            className="border p-2 rounded-lg col-span-3"
             required
           />
           <input
             type="text"
             placeholder="Mô tả..."
             value={rDesc}
-            onChange={e => setRDesc(e.target.value)}
-            className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none md:col-span-2"
+            onChange={(e) => setRDesc(e.target.value)}
+            className="border p-2 rounded-lg col-span-2"
           />
+          {/* Nút thêm (cao 2 hàng) */}
+          <button
+            type="submit"
+            disabled={addingRecurring}
+            className="row-span-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition text-lg font-bold"
+          >
+            {addingRecurring ? "..." : "➕"}
+          </button>
+
+          {/* Hàng 2: ngày + giờ + số lần + đơn vị */}
           <input
             type="date"
             value={rStart}
-            onChange={e => setRStart(e.target.value)}
-            className="border p-2 rounded-lg cursor-pointer"
+            onChange={(e) => setRStart(e.target.value)}
+            className="border p-2 rounded-lg"
+            required
+          />
+          <input
+            type="time"
+            value={rHour}
+            onChange={(e) => setRHour(e.target.value)}
+            className="border p-2 rounded-lg"
             required
           />
           <input
             type="number"
             min="1"
             value={rCount}
-            onChange={e => setRCount(Number(e.target.value))}
-            className="border p-2 rounded-lg w-full"
-            placeholder="Số lần"
-            required
+            onChange={(e) => setRCount(Number(e.target.value))}
+            className="border p-2 rounded-lg"
           />
           <select
             value={rUnit}
-            onChange={e => setRUnit(e.target.value)}
-            className="border p-2 rounded-lg cursor-pointer"
+            onChange={(e) => setRUnit(e.target.value)}
+            className="border p-2 rounded-lg"
           >
             <option value="day">Ngày</option>
             <option value="week">Tuần</option>
             <option value="month">Tháng</option>
           </select>
-          <input
-            type="time"
-            value={rHour}
-            onChange={e => setRHour(e.target.value)}
-            className="border p-2 rounded-lg cursor-pointer"
-            required
-          />
-          <button
-            type="submit"
-            disabled={addingRecurring}
-            className="bg-green-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-green-600 transition cursor-pointer md:col-span-6"
-          >
-            {addingRecurring ? "Đang thêm..." : "➕ Thêm công việc cố định"}
-          </button>
         </form>
 
-        {message && <p className="mt-3 text-sm text-gray-700">{message}</p>}
+        {message && (
+          <p className="mt-2 text-sm text-gray-600">{message}</p>
+        )}
       </div>
 
       {/* Chart + filter + stats */}
