@@ -5,11 +5,9 @@ import {
   Pie,
   Cell,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
 
-const COLORS = ["#4CAF50", "#FFC107", "#F44336"]; // done, pending, overdue
 const isValidTime = (t) => /^([01]\d|2[0-3]):([0-5]\d)$/.test(t);
 
 export default function Dashboard() {
@@ -56,12 +54,11 @@ export default function Dashboard() {
 
   function parseDbDate(str) {
     if (!str) return null;
-    // str dạng: "2025-08-20 00:00:00"
     const [datePart, timePart] = str.split(" ");
     const [year, month, day] = datePart.split("-").map(Number);
     const [hour, minute, second] = timePart.split(":").map(Number);
 
-    // new Date(year, monthIndex, day, hour, minute, second) => luôn tính theo local time
+    // Tạo Date theo local time (Asia/Ho_Chi_Minh)
     return new Date(year, month - 1, day, hour, minute, second || 0);
   }
 
