@@ -56,10 +56,6 @@ export default function Tasks() {
   const toSqlLocal = (d) =>
     `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
 
-  // Format Date -> "YYYY-MM-DD" (local)
-  const toYMD = (d) =>
-    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-  
   const addRecurringTask = async (e) => {
     e.preventDefault();
 
@@ -73,16 +69,15 @@ export default function Tasks() {
       const [hh, mm] = (rHour || "00:00").split(":").map(Number);
       const tasksToAdd = [];
 
+      // ✅ Quy đổi đơn vị sang số ngày
+      const unitToDays = { day: 1, week: 7, month: 30 };
+      const step = unitToDays[rUnit] || 1;
+
       for (let i = 0; i < rCount; i++) {
         let d = new Date(base);
 
-        if (rUnit === "day") {
-          d.setDate(base.getDate() + i);
-        } else if (rUnit === "week") {
-          d.setDate(base.getDate() + i * 7);
-        } else if (rUnit === "month") {
-          d.setMonth(base.getMonth() + i);
-        }
+        // cộng theo số ngày đã quy đổi
+        d.setDate(base.getDate() + i * step);
 
         // set giờ local cố định
         d.setHours(hh, mm, 0, 0);
@@ -99,16 +94,23 @@ export default function Tasks() {
       await api.post("/tasks/bulk", { tasks: tasksToAdd });
 
       const last = tasksToAdd[tasksToAdd.length - 1];
-      const unitLabel = rUnit === "day" ? "ngày" : rUnit === "week" ? "tuần" : "tháng";
+      const unitLabel =
+        rUnit === "day" ? "ngày" : rUnit === "week" ? "tuần" : "tháng";
       const endDate = last.deadline.split(" ")[0];
 
       setMessage(
-        `✅ Đã thêm thành công "${rTitle}", deadline ${pad(hh)}:${pad(mm)} mỗi ${unitLabel} từ ${rStart} đến ${endDate}, công việc sẽ diễn ra trong ${rCount} ${unitLabel}.`
+        `✅ Đã thêm thành công "${rTitle}", deadline ${pad(hh)}:${pad(mm)} mỗi ${unitLabel} từ ${rStart} đến ${endDate}, công việc sẽ diễn ra trong ${rCount} ${unitLabel} (= ${
+          rCount * step
+        } ngày).`
       );
 
       // reset form
-      setRTitle(""); setRDesc(""); setRStart("");
-      setRCount(1); setRUnit("day"); setRHour("");
+      setRTitle("");
+      setRDesc("");
+      setRStart("");
+      setRCount(1);
+      setRUnit("day");
+      setRHour("");
 
       fetchTasks();
     } catch (err) {
