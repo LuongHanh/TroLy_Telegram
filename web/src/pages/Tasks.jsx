@@ -34,6 +34,76 @@ export default function Tasks() {
   const [eDeadline, setEDeadline] = useState("");
   const [ePriority, setEPriority] = useState(3);
 
+  // ==== STATE TASK CỐ ĐỊNH ====
+  const [rTitle, setRTitle] = useState("");
+  const [rDesc, setRDesc] = useState("");
+  const [rStart, setRStart] = useState("");        // ngày bắt đầu
+  const [rCount, setRCount] = useState(1);         // số lần (số ngày/tuần/tháng)
+  const [rUnit, setRUnit] = useState("day");       // đơn vị
+  const [rHour, setRHour] = useState("");          // giờ deadline mỗi ngày (HH:mm)
+  const [addingRecurring, setAddingRecurring] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const addRecurringTask = async (e) => {
+    e.preventDefault();
+
+    if (!window.confirm("Bạn có chắc muốn thêm công việc cố định này?")) return;
+
+    setAddingRecurring(true);
+    setMessage("⏳ Đang thêm...");
+
+    try {
+      const start = new Date(rStart);
+      const tasksToAdd = [];
+
+      for (let i = 0; i < rCount; i++) {
+        let dueDate = new Date(start);
+
+        if (rUnit === "day") {
+          dueDate.setDate(start.getDate() + i);
+        } else if (rUnit === "week") {
+          dueDate.setDate(start.getDate() + i * 7);
+        } else if (rUnit === "month") {
+          dueDate.setMonth(start.getMonth() + i);
+        }
+
+        if (rHour) {
+          const [hh, mm] = rHour.split(":");
+          dueDate.setHours(hh, mm, 0, 0);
+        }
+
+        tasksToAdd.push({
+          title: rTitle,
+          description: rDesc,
+          deadline: dueDate.toISOString().slice(0, 19).replace("T", " "),
+          priority: 3,
+        });
+      }
+
+      // gọi API bulk 1 lần duy nhất
+      await api.post("/tasks/bulk", { tasks: tasksToAdd });
+
+      setAddingRecurring(false);
+      setMessage(
+        `✅ Đã thêm thành công "${rTitle}" - ${rCount} task (${rUnit === "day" ? "ngày" : rUnit === "week" ? "tuần" : "tháng"}). Deadline: ${rHour} mỗi ngày.`
+      );
+
+      // reset form
+      setRTitle("");
+      setRDesc("");
+      setRStart("");
+      setRCount(1);
+      setRUnit("day");
+      setRHour("");
+
+      fetchTasks();
+    } catch (err) {
+      console.error("Lỗi thêm task cố định:", err.response?.data || err);
+      setAddingRecurring(false);
+      setMessage("❌ Lỗi khi thêm task cố định!");
+    }
+  };
+
   // 'YYYY-MM-DDTHH:mm' cho <input type="datetime-local">
   const toInputDT = (val) => {
     if (!val) return "";
@@ -223,6 +293,69 @@ export default function Tasks() {
             Thêm
           </button>
         </form>
+      </div>
+
+      {/* Form thêm task cố định */}
+      <div className="bg-white rounded-2xl shadow p-6">
+        <h3 className="text-lg font-semibold mb-4">🔁 Thêm Task Cố Định</h3>
+        <form onSubmit={addRecurringTask} className="grid grid-cols-1 md:grid-cols-6 gap-3">
+          <input
+            type="text"
+            placeholder="Tên task..."
+            value={rTitle}
+            onChange={e => setRTitle(e.target.value)}
+            className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none md:col-span-2"
+            required
+          />
+          <input
+            type="text"
+            placeholder="Mô tả..."
+            value={rDesc}
+            onChange={e => setRDesc(e.target.value)}
+            className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none md:col-span-2"
+          />
+          <input
+            type="date"
+            value={rStart}
+            onChange={e => setRStart(e.target.value)}
+            className="border p-2 rounded-lg cursor-pointer"
+            required
+          />
+          <input
+            type="number"
+            min="1"
+            value={rCount}
+            onChange={e => setRCount(Number(e.target.value))}
+            className="border p-2 rounded-lg w-full"
+            placeholder="Số lần"
+            required
+          />
+          <select
+            value={rUnit}
+            onChange={e => setRUnit(e.target.value)}
+            className="border p-2 rounded-lg cursor-pointer"
+          >
+            <option value="day">Ngày</option>
+            <option value="week">Tuần</option>
+            <option value="month">Tháng</option>
+          </select>
+          <input
+            type="time"
+            value={rHour}
+            onChange={e => setRHour(e.target.value)}
+            className="border p-2 rounded-lg cursor-pointer"
+            required
+          />
+          <button
+            type="submit"
+            disabled={addingRecurring}
+            className="bg-green-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-green-600 transition cursor-pointer md:col-span-6"
+          >
+            {addingRecurring ? "Đang thêm..." : "➕ Thêm công việc cố định"}
+          </button>
+        </form>
+
+        {message && <p className="mt-3 text-sm text-gray-700">{message}</p>}
       </div>
 
       {/* Chart + filter + stats */}

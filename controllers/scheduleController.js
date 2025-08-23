@@ -356,4 +356,54 @@ router.get('/year/:date', async (req, res) => {
   }
 });
 
+// ======================= HÀM THÊM NHIỀU TASK =======================
+export async function addManyTasks(tasks) {
+  const pool = await poolPromise;
+  const results = [];
+
+  for (const t of tasks) {
+    const result = await pool.request()
+      .input('Title', sql.NVarChar, t.title)
+      .input('Description', sql.NVarChar, t.description || null)
+      .input('Deadline', sql.NVarChar, t.deadline || null)
+      .input('Priority', sql.Int, t.priority || 3)
+      .input('Status', sql.NVarChar, 'pending')
+      .query(`
+        INSERT INTO Tasks (Title, Description, Deadline, Priority, Status)
+        OUTPUT 
+          INSERTED.Id,
+          INSERTED.Title,
+          INSERTED.Description,
+          CONVERT(varchar, INSERTED.Deadline, 120) AS DeadlineStr,
+          INSERTED.Priority,
+          INSERTED.Status
+        VALUES (@Title, @Description, CAST(@Deadline AS datetime), @Priority, @Status)
+      `);
+
+    const row = result.recordset[0];
+    results.push({
+      ...row,
+      DeadlineFormatted: formatDateVN(row.DeadlineStr),
+      PriorityLabel: priorityLabel(row.Priority)
+    });
+  }
+
+  return results;
+}
+
+// ======================= API BULK =======================
+router.post('/bulk', async (req, res) => {
+  try {
+    const tasks = req.body.tasks; // [{title, description, deadline, priority}, ...]
+    if (!Array.isArray(tasks) || tasks.length === 0) {
+      return res.status(400).json({ error: 'tasks must be a non-empty array' });
+    }
+
+    const data = await addManyTasks(tasks);
+    res.status(201).json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
