@@ -226,11 +226,11 @@ export default function Tasks() {
       </div>
 
       {/* Chart + filter + stats */}
-      {total > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Chart */}
-          <div className="bg-white rounded-2xl shadow p-4 flex flex-col items-center justify-center lg:col-span-1">
-            <h4 className="font-semibold mb-2">Tình trạng Tasks</h4>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Chart */}
+        <div className="bg-white rounded-2xl shadow p-4 flex flex-col items-center justify-center lg:col-span-1">
+          <h4 className="font-semibold mb-2">Tình trạng Tasks</h4>
+          {total > 0 ? (
             <div className="h-64 w-full max-w-xs mx-auto">
               <ResponsiveContainer>
                 <PieChart>
@@ -257,67 +257,75 @@ export default function Tasks() {
                 </PieChart>
               </ResponsiveContainer>
             </div>
+          ) : (
+            <p className="text-gray-500 mt-8">Chưa có dữ liệu để hiển thị</p>
+          )}
+        </div>
+
+        {/* Stats + Filter */}
+        <div className="bg-white rounded-2xl shadow p-6 space-y-4 lg:col-span-2">
+          <p className="text-lg font-semibold">
+            ✅ Hoàn thành: {doneCount}/{total} ({percent}%)
+          </p>
+          <div className="w-full bg-gray-200 rounded-full h-4">
+            <div
+              className="bg-green-500 h-4 rounded-full transition-all"
+              style={{ width: `${percent}%` }}
+            />
           </div>
 
-          {/* Stats */}
-          <div className="bg-white rounded-2xl shadow p-6 space-y-4 lg:col-span-2">
-            <p className="text-lg font-semibold">
-              ✅ Hoàn thành: {doneCount}/{total} ({percent}%)
-            </p>
-            <div className="w-full bg-gray-200 rounded-full h-4">
-              <div
-                className="bg-green-500 h-4 rounded-full transition-all"
-                style={{ width: `${percent}%` }}
+          {/* Bộ lọc */}
+          <div className="flex flex-wrap gap-3 mt-4">
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="border p-2 rounded-lg cursor-pointer"
+            >
+              {FILTERS.map(f => (
+                <option key={f.key} value={f.key}>{f.label}</option>
+              ))}
+            </select>
+
+            {filter === "someday" && (
+              <input
+                type="number"
+                value={param}
+                onChange={e => setParam(e.target.value)}
+                placeholder="Số ngày"
+                className="border p-2 rounded-lg w-32"
               />
-            </div>
+            )}
+            {(filter === "by-date" || filter === "week") && (
+              <input
+                type="date"
+                value={param}
+                onChange={e => setParam(e.target.value)}
+                className="border p-2 rounded-lg"
+              />
+            )}
 
-            {/* Bộ lọc */}
-            <div className="flex flex-wrap gap-3 mt-4">
-              <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                className="border p-2 rounded-lg cursor-pointer"
-              >
-                {FILTERS.map(f => (
-                  <option key={f.key} value={f.key}>{f.label}</option>
-                ))}
-              </select>
+            <button
+              onClick={fetchTasks}
+              className="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 cursor-pointer"
+            >
+              🔄 Tải lại
+            </button>
+          </div>
 
-              {filter === "someday" && (
-                <input
-                  type="number"
-                  value={param}
-                  onChange={e => setParam(e.target.value)}
-                  placeholder="Số ngày"
-                  className="border p-2 rounded-lg w-32"
-                />
-              )}
-              {(filter === "by-date" || filter === "week") && (
-                <input
-                  type="date"
-                  value={param}
-                  onChange={e => setParam(e.target.value)}
-                  className="border p-2 rounded-lg"
-                />
-              )}
-
-              <button
-                onClick={fetchTasks}
-                className="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 cursor-pointer"
-              >
-                🔄 Tải lại
-              </button>
-            </div>
-            {/* Nhận xét động */}
+          {/* Nhận xét động */}
+          {total === 0 ? (
+            <p className="mt-16 text-gray-500 italic">⚠️ Không có task nào với bộ lọc hiện tại.</p>
+          ) : (
             <p className="mt-16 text-gray-700 italic">
               {percent === 0 && "🚀 Bắt đầu thôi nào!"}
               {percent > 0 && percent < 50 && "⚡ Cố lên, bạn đã đi được một đoạn rồi."}
               {percent >= 50 && percent < 100 && "🔥 Sắp tới đích, cố thêm chút nữa!"}
               {percent === 100 && "🎉 Xuất sắc! Bạn đã hoàn thành toàn bộ."}
             </p>
-          </div>
+          )}
         </div>
-      )}
+      </div>
+
 
       {/* Danh sách task */}
       <div className="bg-white rounded-2xl shadow p-6">
