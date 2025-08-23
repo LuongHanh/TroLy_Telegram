@@ -313,14 +313,17 @@ export default function Tasks() {
       {/* Form thêm task cố định */}
       <div className="bg-green-50 rounded-xl shadow p-4 mt-6">
         <h3 className="text-base font-semibold mb-3">🔁 Task Cố Định</h3>
-        <form onSubmit={addRecurringTask} className="grid grid-cols-1 md:grid-cols-6 gap-3">
+        <form 
+          onSubmit={addRecurringTask} 
+          className="grid grid-cols-1 md:grid-cols-6 gap-3"
+        >
           {/* Hàng 1: tên + mô tả */}
           <input
             type="text"
             placeholder="Tên task..."
             value={rTitle}
             onChange={(e) => setRTitle(e.target.value)}
-            className="border p-2 rounded-lg col-span-3"
+            className="border p-2 rounded-lg col-span-1 md:col-span-3"
             required
           />
           <input
@@ -328,18 +331,10 @@ export default function Tasks() {
             placeholder="Mô tả..."
             value={rDesc}
             onChange={(e) => setRDesc(e.target.value)}
-            className="border p-2 rounded-lg col-span-2"
+            className="border p-2 rounded-lg col-span-1 md:col-span-2"
           />
-          {/* Nút thêm (cao 2 hàng) */}
-          <button
-            type="submit"
-            disabled={addingRecurring}
-            className="row-span-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition text-lg font-bold"
-          >
-            {addingRecurring ? "..." : "➕"}
-          </button>
 
-          {/* Hàng 2: ngày + giờ + số lần + đơn vị */}
+          {/* Hàng 2: ngày + giờ + số lần + đơn vị + nút thêm */}
           <input
             type="date"
             value={rStart}
@@ -370,6 +365,15 @@ export default function Tasks() {
             <option value="week">Tuần</option>
             <option value="month">Tháng</option>
           </select>
+
+          {/* Nút thêm */}
+          <button
+            type="submit"
+            disabled={addingRecurring}
+            className="bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium px-4 py-2"
+          >
+            {addingRecurring ? "..." : "Thêm"}
+          </button>
         </form>
 
         {message && (
