@@ -65,52 +65,46 @@ export default function Tasks() {
     setMessage("⏳ Đang thêm...");
 
     try {
-      const base = parseLocalDate(rStart); // local
+      const base = parseLocalDate(rStart); // local 00:00
       const [hh, mm] = (rHour || "00:00").split(":").map(Number);
+
+      // ✅ Quy đổi tất cả về NGÀY
+      const count = Math.max(1, Number(rCount) || 1);
+      let totalDays = count;
+
+      if (rUnit === "week") {
+        totalDays = count * 7;
+      } else if (rUnit === "month") {
+        // Tính số ngày thực sự của N tháng kể từ ngày bắt đầu
+        const endExclusive = new Date(base.getFullYear(), base.getMonth() + count, base.getDate());
+        endExclusive.setHours(0, 0, 0, 0);
+        totalDays = Math.max(1, Math.round((endExclusive - base) / 86400000));
+      }
+
       const tasksToAdd = [];
-
-      // ✅ Quy đổi đơn vị sang số ngày
-      const unitToDays = { day: 1, week: 7, month: 30 };
-      const step = unitToDays[rUnit] || 1;
-
-      for (let i = 0; i < rCount; i++) {
-        let d = new Date(base);
-
-        // cộng theo số ngày đã quy đổi
-        d.setDate(base.getDate() + i * step);
-
-        // set giờ local cố định
-        d.setHours(hh, mm, 0, 0);
+      for (let i = 0; i < totalDays; i++) {
+        const d = new Date(base);
+        d.setDate(base.getDate() + i); // chạy từng NGÀY
+        d.setHours(hh, mm, 0, 0);      // giữ giờ local cố định
 
         tasksToAdd.push({
           title: rTitle,
           description: rDesc,
-          // GỬI LOCAL SQL STRING, KHÔNG toISOString()
-          deadline: toSqlLocal(d),
+          deadline: toSqlLocal(d), // "YYYY-MM-DD HH:mm:ss" local
           priority: 3,
         });
       }
 
       await api.post("/tasks/bulk", { tasks: tasksToAdd });
 
-      const last = tasksToAdd[tasksToAdd.length - 1];
-      const unitLabel =
-        rUnit === "day" ? "ngày" : rUnit === "week" ? "tuần" : "tháng";
-      const endDate = last.deadline.split(" ")[0];
-
+      const endDate = tasksToAdd[tasksToAdd.length - 1].deadline.split(" ")[0];
       setMessage(
-        `✅ Đã thêm thành công "${rTitle}", deadline ${pad(hh)}:${pad(mm)} mỗi ${unitLabel} từ ${rStart} đến ${endDate}, công việc sẽ diễn ra trong ${rCount} ${unitLabel} (= ${
-          rCount * step
-        } ngày).`
+        `✅ Đã thêm thành công "${rTitle}", deadline ${pad(hh)}:${pad(mm)} mỗi ngày từ ${rStart} đến ${endDate}, công việc sẽ diễn ra trong ${totalDays} ngày.`
       );
 
       // reset form
-      setRTitle("");
-      setRDesc("");
-      setRStart("");
-      setRCount(1);
-      setRUnit("day");
-      setRHour("");
+      setRTitle(""); setRDesc(""); setRStart("");
+      setRCount(1); setRUnit("day"); setRHour("");
 
       fetchTasks();
     } catch (err) {
@@ -315,72 +309,71 @@ export default function Tasks() {
       {/* Form thêm task cố định */}
       <div className="bg-green-50 rounded-xl shadow p-4 mt-6">
         <h3 className="text-base font-semibold mb-3">🔁 Task Cố Định</h3>
-        <form 
-          onSubmit={addRecurringTask} 
-          className="grid grid-cols-1 md:grid-cols-6 gap-3"
-        >
-          {/* Hàng 1: tên + mô tả */}
+        <form onSubmit={addRecurringTask} className="p-4 bg-white rounded-xl shadow-md space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
             type="text"
-            placeholder="Tên task..."
+            className="border rounded-lg p-2 w-full"
+            placeholder="Tên công việc"
             value={rTitle}
             onChange={(e) => setRTitle(e.target.value)}
-            className="border p-2 rounded-lg col-span-1 md:col-span-3"
             required
           />
           <input
             type="text"
-            placeholder="Mô tả..."
+            className="border rounded-lg p-2 w-full"
+            placeholder="Mô tả"
             value={rDesc}
             onChange={(e) => setRDesc(e.target.value)}
-            className="border p-2 rounded-lg col-span-1 md:col-span-2"
           />
+        </div>
 
-          {/* Hàng 2: ngày + giờ + số lần + đơn vị + nút thêm */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <input
             type="date"
+            className="border rounded-lg p-2 w-full"
             value={rStart}
             onChange={(e) => setRStart(e.target.value)}
-            className="border p-2 rounded-lg"
             required
           />
           <input
             type="time"
+            className="border rounded-lg p-2 w-full"
             value={rHour}
             onChange={(e) => setRHour(e.target.value)}
-            className="border p-2 rounded-lg"
             required
           />
           <input
             type="number"
             min="1"
+            className="border rounded-lg p-2 w-full"
             value={rCount}
-            onChange={(e) => setRCount(Number(e.target.value))}
-            className="border p-2 rounded-lg"
+            onChange={(e) => setRCount(e.target.value)}
+            required
           />
           <select
+            className="border rounded-lg p-2 w-full"
             value={rUnit}
             onChange={(e) => setRUnit(e.target.value)}
-            className="border p-2 rounded-lg"
           >
             <option value="day">Ngày</option>
             <option value="week">Tuần</option>
             <option value="month">Tháng</option>
           </select>
+        </div>
 
-          {/* Nút thêm */}
+        <div className="flex justify-end">
           <button
             type="submit"
             disabled={addingRecurring}
-            className="bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium px-4 py-2"
+            className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition"
           >
-            {addingRecurring ? "..." : "Thêm"}
+            {addingRecurring ? "Đang thêm..." : "Thêm"}
           </button>
-        </form>
+        </div>
 
-        {message && (
-          <p className="mt-2 text-sm text-gray-600">{message}</p>
-        )}
+        {message && <p className="text-sm text-gray-600">{message}</p>}
+      </form>
       </div>
 
       {/* Chart + filter + stats */}
