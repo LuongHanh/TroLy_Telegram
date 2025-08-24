@@ -44,6 +44,10 @@ export default function Tasks() {
   const [addingRecurring, setAddingRecurring] = useState(false);
   const [message, setMessage] = useState("");
 
+  // State cho form
+  const [showAddTask, setShowAddTask] = useState(false);
+  const [showRecurringForm, setShowRecurringForm] = useState(false);
+
   const pad = (n) => String(n).padStart(2, "0");
 
   // Tạo Date local từ "YYYY-MM-DD"
@@ -262,119 +266,135 @@ export default function Tasks() {
       <h2 className="text-3xl font-bold text-gray-800">📋 Quản lý Tasks</h2>
 
       {/* Form thêm task */}
-      <div className="bg-white rounded-2xl shadow p-6">
-        <h3 className="text-lg font-semibold mb-4">➕ Thêm Task mới</h3>
-        <form onSubmit={addTask} className="grid grid-cols-1 md:grid-cols-5 gap-3">
-          <input
-            type="text"
-            placeholder="Tên task..."
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
-            required
-          />
-          <input
-            type="text"
-            placeholder="Mô tả..."
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-            className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
-          />
-          <input
-            type="datetime-local"
-            value={deadline}
-            onChange={e => setDeadline(e.target.value)}
-            className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none cursor-pointer"
-          />
-          <select
-            value={priority}
-            onChange={e => setPriority(Number(e.target.value))}
-            className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none cursor-pointer"
-          >
-            <option value={1}>Ít quan trọng</option>
-            <option value={2}>Khá quan trọng</option>
-            <option value={3}>Quan trọng</option>
-            <option value={4}>Cần làm ngay</option>
-            <option value={5}>Cần chú ý</option>
-          </select>
-          <button
-            type="submit"
-            className="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-600 transition cursor-pointer"
-          >
-            Thêm
-          </button>
-        </form>
-      </div>
+      <button
+        onClick={() => setShowAddTask(!showAddTask)}
+        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+      >
+        {showAddTask ? "Ẩn Form Thêm Task" : "➕ Thêm Task mới"}
+      </button>
+      {showAddTask && (
+        <div className="bg-white rounded-2xl shadow p-6">
+          <h3 className="text-lg font-semibold mb-4">➕ Thêm Task mới</h3>
+          <form onSubmit={addTask} className="grid grid-cols-1 md:grid-cols-5 gap-3">
+            <input
+              type="text"
+              placeholder="Tên task..."
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Mô tả..."
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+            />
+            <input
+              type="datetime-local"
+              value={deadline}
+              onChange={e => setDeadline(e.target.value)}
+              className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none cursor-pointer"
+            />
+            <select
+              value={priority}
+              onChange={e => setPriority(Number(e.target.value))}
+              className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none cursor-pointer"
+            >
+              <option value={1}>Ít quan trọng</option>
+              <option value={2}>Khá quan trọng</option>
+              <option value={3}>Quan trọng</option>
+              <option value={4}>Cần làm ngay</option>
+              <option value={5}>Cần chú ý</option>
+            </select>
+            <button
+              type="submit"
+              className="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-600 transition cursor-pointer"
+            >
+              Thêm
+            </button>
+          </form>
+        </div>
+      )}
 
       {/* Form thêm task cố định */}
-      <div className="bg-green-50 rounded-xl shadow p-4 mt-6">
-        <h3 className="text-base font-semibold mb-3">🔁 Task Cố Định</h3>
-        <form onSubmit={addRecurringTask} className="p-4 bg-white rounded-xl shadow-md space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input
-            type="text"
-            className="border rounded-lg p-2 w-full"
-            placeholder="Tên công việc"
-            value={rTitle}
-            onChange={(e) => setRTitle(e.target.value)}
-            required
-          />
-          <input
-            type="text"
-            className="border rounded-lg p-2 w-full"
-            placeholder="Mô tả"
-            value={rDesc}
-            onChange={(e) => setRDesc(e.target.value)}
-          />
-        </div>
+      <button
+        onClick={() => setShowRecurringForm(!showRecurringForm)}
+        className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+      >
+        {showRecurringForm ? "Ẩn Form Task Cố Định" : "🔁 Thêm Task Cố Định"}
+      </button>
+      {showRecurringForm && (
+        <div className="bg-green-50 rounded-xl shadow p-4 mt-6">
+          <h3 className="text-base font-semibold mb-3">🔁 Task Cố Định</h3>
+          <form onSubmit={addRecurringTask} className="p-4 bg-white rounded-xl shadow-md space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input
+              type="text"
+              className="border rounded-lg p-2 w-full"
+              placeholder="Tên công việc"
+              value={rTitle}
+              onChange={(e) => setRTitle(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              className="border rounded-lg p-2 w-full"
+              placeholder="Mô tả"
+              value={rDesc}
+              onChange={(e) => setRDesc(e.target.value)}
+            />
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <input
-            type="date"
-            className="border rounded-lg p-2 w-full"
-            value={rStart}
-            onChange={(e) => setRStart(e.target.value)}
-            required
-          />
-          <input
-            type="time"
-            className="border rounded-lg p-2 w-full"
-            value={rHour}
-            onChange={(e) => setRHour(e.target.value)}
-            required
-          />
-          <input
-            type="number"
-            min="1"
-            className="border rounded-lg p-2 w-full"
-            value={rCount}
-            onChange={(e) => setRCount(e.target.value)}
-            required
-          />
-          <select
-            className="border rounded-lg p-2 w-full"
-            value={rUnit}
-            onChange={(e) => setRUnit(e.target.value)}
-          >
-            <option value="day">Ngày</option>
-            <option value="week">Tuần</option>
-            <option value="month">Tháng</option>
-          </select>
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input
+              type="date"
+              className="border rounded-lg p-2 w-full"
+              value={rStart}
+              onChange={(e) => setRStart(e.target.value)}
+              required
+            />
+            <input
+              type="time"
+              className="border rounded-lg p-2 w-full"
+              value={rHour}
+              onChange={(e) => setRHour(e.target.value)}
+              required
+            />
+            <input
+              type="number"
+              min="1"
+              className="border rounded-lg p-2 w-full"
+              value={rCount}
+              onChange={(e) => setRCount(e.target.value)}
+              required
+            />
+            <select
+              className="border rounded-lg p-2 w-full"
+              value={rUnit}
+              onChange={(e) => setRUnit(e.target.value)}
+            >
+              <option value="day">Ngày</option>
+              <option value="week">Tuần</option>
+              <option value="month">Tháng</option>
+            </select>
+          </div>
 
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={addingRecurring}
-            className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition"
-          >
-            {addingRecurring ? "Đang thêm..." : "Thêm"}
-          </button>
-        </div>
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              disabled={addingRecurring}
+              className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition"
+            >
+              {addingRecurring ? "Đang thêm..." : "Thêm"}
+            </button>
+          </div>
 
-        {message && <p className="text-sm text-gray-600">{message}</p>}
-      </form>
-      </div>
+          {message && <p className="text-sm text-gray-600">{message}</p>}
+        </form>
+        </div>
+      )}
 
       {/* Chart + filter + stats */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
