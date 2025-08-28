@@ -47,6 +47,7 @@ export default function Tasks() {
   // State cho form
   const [showAddTask, setShowAddTask] = useState(false);
   const [showRecurringForm, setShowRecurringForm] = useState(false);
+  const [offset, setOffset] = useState(0); // dịch chuyển block thời gian
 
   const pad = (n) => String(n).padStart(2, "0");
 
@@ -54,6 +55,12 @@ export default function Tasks() {
   const parseLocalDate = (ymd) => {
     const [y, m, d] = ymd.split("-").map(Number);
     return new Date(y, m - 1, d, 0, 0, 0, 0); // local midnight
+  };
+
+  const shiftDate = (base, days) => {
+    const d = new Date(base);
+    d.setDate(d.getDate() + days);
+    return d.toISOString().split("T")[0]; // YYYY-MM-DD
   };
 
   // Format Date -> "YYYY-MM-DD HH:mm:ss" (local)
@@ -190,6 +197,22 @@ export default function Tasks() {
     fetchTasks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, param]);
+
+  const goPrev = () => {
+    if (filter === "today" || filter === "by-date") {
+      setParam(shiftDate(param, -1));
+    } else if (filter === "week") {
+      setParam(shiftDate(param, -7));
+    } 
+  };
+
+  const goNext = () => {
+    if (filter === "today" || filter === "by-date") {
+      setParam(shiftDate(param, 1));
+    } else if (filter === "week") {
+      setParam(shiftDate(param, 7));
+    }
+  };
 
   const formatDeadline = (val) => {
     if (!val) return null;
@@ -481,6 +504,20 @@ export default function Tasks() {
             >
               🔄 Tải lại
             </button>
+            <div className="flex gap-2">
+              <button
+                onClick={goPrev}
+                className="bg-gray-200 px-3 py-2 rounded-lg hover:bg-gray-300"
+              >
+                ⬅️
+              </button>
+              <button
+                onClick={goNext}
+                className="bg-gray-200 px-3 py-2 rounded-lg hover:bg-gray-300"
+              >
+                ➡️
+              </button>
+            </div>
           </div>
 
           {/* Nhận xét động */}
