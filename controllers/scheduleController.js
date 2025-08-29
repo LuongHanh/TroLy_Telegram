@@ -69,14 +69,14 @@ export async function addTask({ title, description, deadline, priority }) {
     PriorityLabel: priorityLabel(t.Priority)
   };
 }
-
+//GETDATE() khiến giờ hiện tại bị lệch 7 tiếng so với giờ Việt Nam, sửa thành SYSDATETIMEOFFSET() AT TIME ZONE 'SE Asia Standard Time'
 export async function getTodaySchedule() {
   const pool = await poolPromise;
   const result = await pool.request().query(`
     SELECT *,
            CONVERT(varchar, Deadline, 120) AS DeadlineStr
     FROM Tasks
-    WHERE CAST(Deadline AS DATE) = CAST(GETDATE() AS DATE)
+    WHERE CAST(Deadline AS DATE) = CAST(SYSDATETIMEOFFSET() AT TIME ZONE 'SE Asia Standard Time' AS DATE)
     ORDER BY Deadline ASC
   `);
 

@@ -95,14 +95,6 @@ async function checkPersonalSchedule() {
     const evtSec = evtMs / 1000;
     const diffSec = evtSec - nowSec;
 
-    // Trước 5 phút
-    if (withinToleranceSec(diffSec, beforeSec, tolSec)) {
-      const key = `sched:${dayKey}:${item.Id}:before`;
-      if (shouldSendOnce(key)) {
-        await sendTG(`🕒 *Sắp tới* (${SCHEDULE_REMIND_BEFORE_MIN} phút nữa): _${item.Title}_ (${item.Time})`);
-      }
-    }
-
     // Đúng giờ
     if (withinToleranceSec(diffSec, 0, tolSec)) {
       const key = `sched:${dayKey}:${item.Id}:at`;
